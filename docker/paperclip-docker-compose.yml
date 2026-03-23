@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  paperclip:
+    image: ghcr.io/paperclipai/paperclip:latest
+    container_name: paperclip
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://lolo:iCxXchzXYtC7hqEn26S9rfMWZvVeZuw4cR53ORNX8Spv7EGFVJfK52iUs0B07Ag6@b10e104vfb7gy490xknu8743:5432/paperclip
+      - SESSION_SECRET=${SESSION_SECRET}
+      - PORT=3100
+      - HOST=0.0.0.0
+    networks:
+      - coolify
+    labels:
+      - "coolify.managed=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.paperclip.rule=Host(`paperclip.tudominio.com`)"
+      - "traefik.http.routers.paperclip.entrypoints=websecure"
+      - "traefik.http.routers.paperclip.tls=true"
+      - "traefik.http.routers.paperclip.tls.certresolver=letsencrypt"
+      - "traefik.http.services.paperclip.loadbalancer.server.port=3100"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  coolify:
+    external: true
